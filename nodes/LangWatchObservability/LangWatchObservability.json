@@ -1,0 +1,23 @@
+{
+	"node": "LangWatchObservability",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["AI"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.langwatch.ai/api-reference/traces/overview#authentication"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://docs.langwatch.ai/concepts"
+			}
+		],
+		"secondaryDocumentation": [
+			{
+				"url": "https://docs.langwatch.ai/integration/typescript/guide"
+			}
+		]
+	}
+}

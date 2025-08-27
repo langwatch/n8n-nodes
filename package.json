@@ -1,9 +1,16 @@
 {
-  "name": "n8n-nodes-<...>",
+  "name": "@langwatch/n8n-nodes",
   "version": "0.1.0",
   "description": "",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package",
+    "n8n",
+    "langwatch",
+    "observability",
+    "llm-ops",
+    "prompt-engineering",
+    "prompt-management",
+    "evaluation"
   ],
   "license": "MIT",
   "homepage": "",
@@ -13,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/langwatch/n8n-nodes-langwatch.git"
   },
   "engines": {
     "node": ">=20.15"
@@ -33,12 +40,11 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ExampleCredentialsApi.credentials.js",
-      "dist/credentials/HttpBinApi.credentials.js"
+      "dist/credentials/LangWatchApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "dist/nodes/HttpBin/HttpBin.node.js"
+      "dist/nodes/LangWatchObservability/LangWatchObservability.node.js",
+      "dist/nodes/LangWatchPrompt/LangWatchPrompt.node.js"
     ]
   },
   "devDependencies": {
@@ -51,5 +57,11 @@
   },
   "peerDependencies": {
     "n8n-workflow": "*"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/context-async-hooks": "^2.0.1",
+    "@opentelemetry/sdk-node": "^0.203.0",
+    "langwatch": "^0.4.2"
   }
 }
