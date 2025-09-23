@@ -1,7 +1,7 @@
 {
-  "name": "@langwatch/n8n-nodes",
-  "version": "0.1.0",
-  "description": "",
+  "name": "@langwatch/n8n-nodes-langwatch",
+  "version": "0.1.1",
+  "description": "LangWatch nodes for n8n - observability, evaluation, and prompt management for LLM applications",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -15,8 +15,8 @@
   "license": "MIT",
   "homepage": "",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "LangWatch Team",
+    "email": "hey@langwatch.ai"
   },
   "repository": {
     "type": "git",
@@ -27,8 +27,8 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "npx rimraf dist && tsc && gulp build:icons",
-    "dev": "tsc --watch",
+    "build": "npx rimraf dist && tsup && gulp build:icons",
+    "dev": "tsup --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix",
@@ -48,20 +48,20 @@
     ]
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "~8.32.0",
-    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "~8.44.0",
+    "eslint": "^8.57.1",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
-    "gulp": "^5.0.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "gulp": "^5.0.1",
+    "prettier": "^3.6.2",
+    "langwatch": "^0.7.1",
+    "liquidjs": "^10.21.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
   },
-  "dependencies": {
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/context-async-hooks": "^2.0.1",
-    "@opentelemetry/sdk-node": "^0.203.0",
-    "langwatch": "^0.4.2"
-  }
+  "dependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": []
 }
