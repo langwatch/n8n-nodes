@@ -1,0 +1,18 @@
+{
+	"node": "LangWatchDatasetRowTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["AI", "Trigger"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.langwatch.ai/api-reference/traces/overview#authentication"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://docs.langwatch.ai/datasets/overview"
+			}
+		]
+	}
+}
