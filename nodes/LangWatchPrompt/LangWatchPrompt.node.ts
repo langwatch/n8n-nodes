@@ -1,4 +1,4 @@
-import type {
+import {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
@@ -6,35 +6,20 @@ import type {
 	IDataObject,
 	INodePropertyOptions,
 	ILoadOptionsFunctions,
+	NodeConnectionTypes,
+	NodeOperationError,
 } from 'n8n-workflow';
-import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
-import { getLangWatchTracer, LangWatch } from 'langwatch';
-import { getWorkflowExecutionContext } from '../../shared/otel';
-import { context, SpanStatusCode, trace } from '@opentelemetry/api';
-
-interface VariableMapping {
-	name: string;
-	value: string;
-}
-
-interface InputDataVariableMapping {
-	name: string;
-	dataPath: string;
-}
-
-interface VariablesCollection {
-	variables?: VariableMapping[];
-}
-
-interface InputDataVariablesCollection {
-	variables?: InputDataVariableMapping[];
-}
-
-type TemplateVariables = Record<string, any>;
+import { LangWatch } from 'langwatch';
+import type {
+	LangWatchCredentials,
+	VariablesCollection,
+	InputDataVariablesCollection,
+	TemplateVariables,
+} from '../../shared/types';
 
 export class LangWatchPrompt implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'LangWatch Prompt',
+		displayName: 'Retrieve LangWatch Prompt',
 		name: 'langWatchPrompt',
 		icon: 'file:logo.svg',
 		group: ['transform'],
@@ -44,8 +29,8 @@ export class LangWatchPrompt implements INodeType {
 		defaults: {
 			name: 'LangWatch Prompt',
 		},
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		hints: [
 			{
 				message:
@@ -123,7 +108,8 @@ export class LangWatchPrompt implements INodeType {
 				},
 				required: true,
 				default: '',
-				description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 				displayOptions: {
 					show: {
 						promptSelectionMethod: ['dropdown'],
@@ -297,9 +283,7 @@ export class LangWatchPrompt implements INodeType {
 
 	methods = {
 		loadOptions: {
-			async getPrompts(
-				this: ILoadOptionsFunctions,
-			): Promise<INodePropertyOptions[]> {
+			async getPrompts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const credentials = (await this.getCredentials('langwatchApi')) as {
 					host: string;
 					apiKey: string;
@@ -312,8 +296,8 @@ export class LangWatchPrompt implements INodeType {
 
 				const prompts = await langwatch.prompts.getAll();
 				return prompts.map((prompt) => ({
-					name: prompt.name || prompt.handle || prompt.id,
-					value: prompt.id,
+					name: prompt.handle || prompt.id || 'Unnamed Prompt',
+					value: prompt.id || '',
 					description: prompt.handle ? `Handle: ${prompt.handle}` : `ID: ${prompt.id}`,
 				}));
 			},
@@ -321,7 +305,11 @@ export class LangWatchPrompt implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const promptSelectionMethod = this.getNodeParameter('promptSelectionMethod', 0, 'manual') as string;
+		const promptSelectionMethod = this.getNodeParameter(
+			'promptSelectionMethod',
+			0,
+			'manual',
+		) as string;
 		const handleOrId = this.getNodeParameter('handleOrId', 0, '') as string;
 		const promptId = this.getNodeParameter('promptId', 0, '') as string;
 		const versionSelection = this.getNodeParameter('versionSelection', 0, 'latest') as string;
@@ -336,88 +324,69 @@ export class LangWatchPrompt implements INodeType {
 		// Determine version options based on selection
 		const versionOptions = versionSelection === 'specific' && version ? { version } : undefined;
 
-		const tracer = getLangWatchTracer('langwatch.n8n.prompts');
-		const credentials = (await this.getCredentials('langwatchApi')) as {
-			host: string;
-			apiKey: string;
-		};
-		const { withContext } = getWorkflowExecutionContext(this);
+		const credentials = (await this.getCredentials('langwatchApi')) as LangWatchCredentials;
 
 		const langwatch = new LangWatch({
 			apiKey: credentials.apiKey,
 			endpoint: credentials.host,
 		});
 
-		return await withContext(async () => {
-			const span = tracer.startSpan('n8n:LangWatch Prompt Node');
-			try {
-				return await context.with(trace.setSpan(context.active(), span), async () => {
-					try {
-						// Fetch the prompt using the SDK
-						const prompt = await langwatch.prompts.get(finalPromptId, versionOptions);
-						if (!prompt) {
-							throw new NodeOperationError(
-								this.getNode(),
-								`Prompt with handle or ID '${finalPromptId}' not found`,
-							);
-						}
-
-						const outputData: IDataObject = {
-							compiledPrompt: void 0, // So that it's at the top in the UI if present.
-							prompt: {
-								...prompt,
-
-								// Wipe this as it's a duplicate
-								promptData: void 0,
-							},
-						};
-
-						if (compile) {
-							const variables = collectVariables(this, variableSource);
-
-							try {
-								const compiledPrompt = strict
-									? prompt.compileStrict(variables)
-									: prompt.compile(variables);
-
-								outputData.compiledPrompt = {
-									...compiledPrompt,
-
-									// Wipe these as we persist at the root
-									promptData: void 0,
-									original: void 0,
-								};
-							} catch (compilationError) {
-								if (compilationError instanceof Error) {
-									throw new NodeOperationError(
-										this.getNode(),
-										`Failed to compile prompt: ${compilationError.message}`,
-									);
-								}
-								throw compilationError;
-							}
-						}
-
-						return [[{ json: outputData }]];
-					} catch (error) {
-						if (error instanceof Error) {
-							throw new NodeOperationError(
-								this.getNode(),
-								`LangWatch Prompt error: ${error.message}`,
-							);
-						}
-						throw error;
-					}
-				});
-			} catch (error) {
-				span.recordException(error);
-				span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-
-				throw error;
-			} finally {
-				span.end();
+		try {
+			// Fetch the prompt using the SDK
+			const prompt = await langwatch.prompts.get(finalPromptId, versionOptions);
+			if (!prompt) {
+				throw new NodeOperationError(
+					this.getNode(),
+					`Prompt with handle or ID '${finalPromptId}' not found`,
+				);
 			}
-		});
+
+			const outputData: IDataObject = {
+				compiledPrompt: void 0, // So that it's at the top in the UI if present.
+				prompt: {
+					...prompt,
+
+					// Wipe this as it's a duplicate
+					promptData: void 0,
+				},
+			};
+
+			if (compile) {
+				const variables = collectVariables(this, variableSource);
+
+				try {
+					const compiledPrompt = strict
+						? prompt.compileStrict(variables)
+						: prompt.compile(variables);
+
+					outputData.compiledPrompt = {
+						...compiledPrompt,
+
+						// Wipe these as we persist at the root
+						promptData: void 0,
+						original: void 0,
+					};
+				} catch (compilationError) {
+					if (compilationError instanceof Error) {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Failed to compile prompt: ${compilationError.message}`,
+						);
+					}
+					throw compilationError;
+				}
+			}
+
+			return [[{ json: outputData }]];
+		} catch (error) {
+			if (error instanceof Error) {
+				throw new NodeOperationError(
+					this.getNode(),
+					`LangWatch Prompt error: ${error.message}`,
+				);
+			}
+			throw error;
+		}
 	}
 }
 
