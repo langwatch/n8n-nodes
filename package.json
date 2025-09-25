@@ -43,8 +43,10 @@
       "dist/credentials/LangWatchApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/LangWatchDatasetEvaluationTrigger/LangWatchDatasetEvaluationTrigger.node.js",
-      "dist/nodes/LangWatchPrompt/LangWatchPrompt.node.js"
+      "dist/nodes/LangWatchDatasetBatchTrigger/LangWatchDatasetBatchTrigger.node.js",
+      "dist/nodes/LangWatchDatasetRowTrigger/LangWatchDatasetRowTrigger.node.js",
+      "dist/nodes/LangWatchPrompt/LangWatchPrompt.node.js",
+      "dist/nodes/LangWatchEvaluation/LangWatchEvaluation.node.js"
     ]
   },
   "devDependencies": {

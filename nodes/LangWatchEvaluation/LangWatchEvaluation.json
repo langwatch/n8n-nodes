@@ -1,0 +1,15 @@
+{
+  "node": "LangWatchEvaluation",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["AI"],
+  "resources": {
+    "primaryDocumentation": [
+      {
+        "url": "https://raw.githubusercontent.com/n8n-io/n8n/028a39d58afd7ec1b3ead1b831dc83663b8521b5/packages/nodes-base/nodes/Evaluation/Evaluation/Evaluation.node.ee.ts"
+      }
+    ]
+  }
+}
+
+
