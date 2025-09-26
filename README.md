@@ -1,6 +1,6 @@
 ![LangWatch + n8n](./assets/cover.webp)
 
-# n8n-nodes-langwatch
+# @langwatch/n8n-nodes-langwatch
 
 This is an n8n community node. It lets you use [LangWatch](https://langwatch.ai) in your n8n workflows.
 
