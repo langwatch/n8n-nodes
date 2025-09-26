@@ -1,4 +1,4 @@
-![LangWatch + n8n](assets/cover.webp)
+![LangWatch + n8n](./assets/cover.webp)
 
 # n8n-nodes-langwatch
 
@@ -12,7 +12,7 @@ This is an n8n community node. It lets you use [LangWatch](https://langwatch.ai)
 
 For complete LangWatch integration, pair these nodes with `@langwatch/n8n-observability` to automatically trace your n8n workflows:
 
-![Observability Setup](assets/observability.webp)
+![Observability Setup](./assets/observability.webp)
 
 **Quick setup for self-hosted n8n via npm:**
 ```bash
@@ -22,11 +22,13 @@ export N8N_OTEL_SERVICE_NAME=my-n8n
 n8n start
 ```
 
-[Installation](#installation)  
-[Operations](#operations)  
-[Credentials](#credentials)  
-[Development](#development)  
-[Resources](#resources)
+## Table of Contents
+
+- [Installation](#installation)  
+- [Operations](#operations)  
+- [Credentials](#credentials)  
+- [Development](#development)  
+- [Resources](#resources)
 
 ## Installation
 
