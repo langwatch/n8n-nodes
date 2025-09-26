@@ -63,6 +63,10 @@ Emit one item per dataset row sequentially until done. Optionally initializes an
 ### Dataset Row Trigger
 Fetch a single dataset row per execution while maintaining an internal cursor. Great for stepwise or scheduled processing.
 
+<div align="center">
+  <img src="./assets/trigger-dataset-row.webp" alt="Dataset Row Trigger node configuration interface" style="max-width: 500px;" />
+</div>
+
 **Key parameters:**
 - Dataset Slug or ID
 - Row Processing Options: startRow, endRow, stepSize, limitRows/maxRows
@@ -70,6 +74,10 @@ Fetch a single dataset row per execution while maintaining an internal cursor. G
 
 ### Evaluation
 Run evaluators and/or record results with multiple operation modes.
+
+<div align="center">
+  <img src="./assets/node-evaluation-auto.webp" alt="Evaluation node configuration interface showing auto mode" style="max-width: 500px;" />
+</div>
 
 **Operations:**
 - Auto (Recommended) - automatically selects behavior based on inputs
@@ -87,6 +95,10 @@ Run evaluators and/or record results with multiple operation modes.
 
 ### Prompt
 Retrieve and optionally compile a prompt from LangWatch Prompt Manager.
+
+<div align="center">
+  <img src="./assets/node-prompt.webp" alt="Prompt node configuration interface" style="max-width: 500px;" />
+</div>
 
 **Key parameters:**
 - Prompt selection: Manual (handle/ID) or Dropdown
