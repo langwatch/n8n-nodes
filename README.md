@@ -8,6 +8,20 @@ This is an n8n community node. It lets you use [LangWatch](https://langwatch.ai)
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
+## 🚀 **Recommended: Pair with Observability**
+
+For complete LangWatch integration, pair these nodes with `@langwatch/n8n-observability` to automatically trace your n8n workflows:
+
+![Observability Setup](assets/observability.webp)
+
+**Quick setup for self-hosted n8n via npm:**
+```bash
+npm install -g @langwatch/n8n-observability
+export EXTERNAL_HOOK_FILES=$(node -e "console.log(require.resolve('@langwatch/n8n-observability/hooks'))")
+export N8N_OTEL_SERVICE_NAME=my-n8n
+n8n start
+```
+
 [Installation](#installation)  
 [Operations](#operations)  
 [Credentials](#credentials)  
@@ -25,13 +39,6 @@ npm install @langwatch/n8n-nodes-langwatch
 
 ### n8n Cloud
 This is a verified community node. Search for `LangWatch` to use this node in n8n Cloud.
-
-### Local development
-```bash
-mkdir -p ~/.n8n/nodes
-cd ~/.n8n/nodes
-npm i @langwatch/n8n-nodes-langwatch
-```
 
 ## Operations
 
