@@ -1,48 +1,141 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+![LangWatch + n8n](assets/cover.webp)
 
-# n8n-nodes-starter
+# n8n-nodes-langwatch
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+This is an n8n community node. It lets you use [LangWatch](https://langwatch.ai) in your n8n workflows.
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+[LangWatch](https://langwatch.ai) is an LLM observability platform that provides tracing, evaluation, datasets, and prompt management.
 
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-## Prerequisites
+[Installation](#installation)  
+[Operations](#operations)  
+[Credentials](#credentials)  
+[Development](#development)  
+[Resources](#resources)
 
+## Installation
+
+### Self-hosted n8n
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
+
+```bash
+npm install @langwatch/n8n-nodes-langwatch
+```
+
+### n8n Cloud
+This is a verified community node. Search for `LangWatch` to use this node in n8n Cloud.
+
+### Local development
+```bash
+mkdir -p ~/.n8n/nodes
+cd ~/.n8n/nodes
+npm i @langwatch/n8n-nodes-langwatch
+```
+
+## Operations
+
+### Dataset Batch Trigger
+Emit one item per dataset row sequentially until done. Optionally initializes an experiment context for batch evaluations.
+
+**Key parameters:**
+- Dataset Slug or ID
+- Experiment Configuration (enable, ID/Slug, Name, Workflow ID)
+- Row Processing Options: startRow, endRow, stepSize, limitRows/maxRows, shuffleRows/seed
+- Emit Interval (ms)
+
+**Output fields:**
+- `entry` (your dataset row payload)
+- `row_number`, `row_id`, `datasetId`, `projectId`, timestamps
+- `_progress` { current, total, percentage, remaining }
+- `_langwatch.dataset` { id, rowId, rowNumber }
+- `_langwatch.experiment` and `_langwatch.batch` when experiment is enabled
+
+### Dataset Row Trigger
+Fetch a single dataset row per execution while maintaining an internal cursor. Great for stepwise or scheduled processing.
+
+**Key parameters:**
+- Dataset Slug or ID
+- Row Processing Options: startRow, endRow, stepSize, limitRows/maxRows
+- Reset Progress, Shuffle Rows, Shuffle Seed
+
+### Evaluation
+Run evaluators and/or record results with multiple operation modes.
+
+**Operations:**
+- Auto (Recommended) - automatically selects behavior based on inputs
+- Check If Evaluating - determines if running in evaluation context
+- Record Result - log a pre-computed evaluation result
+- Run and Record - execute an evaluator and log results
+- Set Outputs (Dataset) - write entries back to a dataset
+
+**Key parameters:**
+- Run ID (optional override; otherwise inferred from `_langwatch.batch.runId`)
+- Evaluator selection (manual or dropdown)
+- Name, Evaluation Data, Evaluator Settings
+- Guardrail flags: `asGuardrail`, `failOnFail`
+- Dataset write: `datasetSlug`, `format` (standard/custom), mapping fields
+
+### Prompt
+Retrieve and optionally compile a prompt from LangWatch Prompt Manager.
+
+**Key parameters:**
+- Prompt selection: Manual (handle/ID) or Dropdown
+- Version selection: Latest or Specific version
+- Compile Prompt: Off/On
+- Variable Source: Manual, From Input Data, or Mixed
+- Strict Compilation: fail if required variables are missing
+
+**Variables:**
+- Manual variables: list of name/value pairs (supports n8n expressions)
+- Input data variables: map template variable → input data path
+
+## Credentials
+
+To use this node, you need to authenticate with LangWatch. You'll need:
+
+1. A LangWatch account at [app.langwatch.ai](https://app.langwatch.ai)
+2. API credentials from your LangWatch project settings: hostname and API key
+
+**How to create:**
+1. In n8n, open Settings → Credentials → New
+2. Pick "LangWatch API"
+3. Fill endpoint and API key → Save → Test
+
+## Development
+
+### Prerequisites
 You need the following installed on your development machine:
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
+- [git](https://git-scm.com/downloads)
+- Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
+- Install n8n with:
   ```
   npm install n8n -g
   ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+- Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
 
-## Using this starter
+### Build new version
+```bash
+npm run build
+npm link
+```
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+### Test in local n8n
+```bash
+cd ~/.n8n/custom
+npm link n8n-nodes-langwatch
+```
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+## Resources
 
-## More information
-
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+- [LangWatch documentation](https://docs.langwatch.ai)
+- [LangWatch n8n integration](https://docs.langwatch.ai/integrations/n8n)
+- [LangWatch Datasets](https://docs.langwatch.ai/datasets/overview)
+- [LangWatch Prompts](https://docs.langwatch.ai/features/prompt-versioning#prompt-versioning)
+- [LangWatch n8n Observability](https://github.com/langwatch/n8n-observability) - for workflow instrumentation
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+[MIT](./LICENSE.md)
