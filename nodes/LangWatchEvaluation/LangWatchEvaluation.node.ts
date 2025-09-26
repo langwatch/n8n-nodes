@@ -288,11 +288,6 @@ export class LangWatchEvaluation implements INodeType {
 		const resolveOperation = (i: number): 'checkIfEvaluating' | 'recordResult' | 'runAndRecord' | 'setOutputs' => {
 			if (operation !== 'auto') return operation as any;
 
-			const ctx = getCtx(i);
-			const j = items[i]?.json as any;
-			// Treat both dataset row triggers and batch triggers as dataset runs
-			const isDatasetRun = !!(ctx?.runId || ctx?.enabled || j?._langwatch?.batch?.runId || j?._langwatch?.dataset || j?.row_id != null || j?.row_number != null);
-
 			const selection = this.getNodeParameter('evaluatorSelectionMethod', i, 'manual') as string;
 			const hasEvaluator =
 				!!(selection === 'dropdown'

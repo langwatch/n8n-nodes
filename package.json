@@ -1,6 +1,6 @@
 {
   "name": "@langwatch/n8n-nodes-langwatch",
-  "version": "0.1.0",
+  "version": "1.0.0-prerelease.1",
   "description": "LangWatch nodes for n8n - observability, evaluation, and prompt management for LLM applications",
   "keywords": [
     "n8n-community-node-package",
@@ -22,6 +22,7 @@
     "type": "git",
     "url": "https://github.com/langwatch/n8n-nodes-langwatch.git"
   },
+  "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">=20.15"
   },
@@ -32,6 +33,7 @@
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
   },
   "files": [
@@ -54,16 +56,15 @@
     "eslint": "^8.57.1",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "gulp": "^5.0.1",
-    "prettier": "^3.6.2",
     "langwatch": "^0.7.1",
     "liquidjs": "^10.21.1",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
   },
-  "dependencies": {},
-  "optionalDependencies": {},
   "bundledDependencies": []
 }
