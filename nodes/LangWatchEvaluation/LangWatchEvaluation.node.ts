@@ -17,18 +17,18 @@ export class LangWatchEvaluation implements INodeType {
 		icon: 'file:logo.svg',
 		group: ['transform'],
 		version: 1,
-		description:
-			'Check if evaluating, record results, run and record evaluators, or set outputs to dataset',
+			description:
+				'Check if evaluating, record results, run and record evaluators; optionally set outputs to dataset (auto writes to dataset only when not running from a dataset/batch).',
 		defaults: { name: 'LangWatch Evaluation' },
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main, NodeConnectionTypes.Main],
 
 		credentials: [{ name: 'langwatchApi', required: true }],
 
-			hints: [
+				hints: [
 				{
 					message:
-						'Auto chooses based on provided fields: Dataset slug/custom outputs ➜ Set Outputs; Evaluator/Eval data ➜ Run and Record; Result JSON ➜ Record Result; otherwise ➜ Check If Evaluating.',
+						'Auto chooses based on provided fields. During dataset/batch runs it will not write to datasets: Evaluator/Eval data ➜ Run and Record; Result JSON ➜ Record Result; Dataset slug/custom outputs (outside dataset runs) ➜ Set Outputs; otherwise ➜ Check If Evaluating.',
 					type: 'info',
 					location: 'inputPane',
 					whenToDisplay: 'always',
@@ -270,6 +270,12 @@ export class LangWatchEvaluation implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
+
+		const normalizeJson = (v: unknown): Record<string, any> => {
+			if (v && typeof v === 'object' && !Array.isArray(v)) return v as Record<string, any>;
+			// Wrap primitives/arrays so n8n always receives an object for json
+			return { value: v } as Record<string, any>;
+		};
 		const operation = this.getNodeParameter('operation', 0, 'auto') as string;
 
 		const getCtx = (i: number) => {
@@ -282,9 +288,10 @@ export class LangWatchEvaluation implements INodeType {
 		const resolveOperation = (i: number): 'checkIfEvaluating' | 'recordResult' | 'runAndRecord' | 'setOutputs' => {
 			if (operation !== 'auto') return operation as any;
 
-			const hasDatasetSlug = !!(this.getNodeParameter('datasetSlug', i, '') as string);
-			const isCustomFormat = (this.getNodeParameter('format', i, 'standard') as string) === 'custom';
-			const customFields = (((this.getNodeParameter('outputs', i, {}) as any) || {}).fields ?? []) as any[];
+			const ctx = getCtx(i);
+			const j = items[i]?.json as any;
+			// Treat both dataset row triggers and batch triggers as dataset runs
+			const isDatasetRun = !!(ctx?.runId || ctx?.enabled || j?._langwatch?.batch?.runId || j?._langwatch?.dataset || j?.row_id != null || j?.row_number != null);
 
 			const selection = this.getNodeParameter('evaluatorSelectionMethod', i, 'manual') as string;
 			const hasEvaluator =
@@ -298,8 +305,9 @@ export class LangWatchEvaluation implements INodeType {
 			const hasResultParam = !!resultRaw && resultRaw !== '{}' && resultRaw !== '""';
 			const hasResultInItem = (items[i]?.json as any)?.evaluation !== undefined;
 
-			if (hasDatasetSlug || (isCustomFormat && customFields.length > 0)) return 'setOutputs';
+			// Prefer running evaluators first when configured
 			if (hasEvaluator || hasEvalData) return 'runAndRecord';
+			// If a direct result is provided, record it
 			if (hasResultParam || hasResultInItem) return 'recordResult';
 			return 'checkIfEvaluating';
 		};
@@ -345,7 +353,8 @@ export class LangWatchEvaluation implements INodeType {
 			const no: INodeExecutionData[] = [];
 			for (let i = 0; i < items.length; i++) {
 				const isEvaluating = !!(getCtx(i)?.runId);
-				const out = { json: { ...(items[i].json as any), isEvaluating }, pairedItem: { item: i } };
+				const base = normalizeJson(items[i].json);
+				const out = { json: { ...base, isEvaluating }, pairedItem: { item: i } };
 				(isEvaluating ? yes : no).push(out);
 			}
 			return [yes, no];
@@ -362,9 +371,9 @@ export class LangWatchEvaluation implements INodeType {
 
 				out.push({
 					json: {
-						...(items[i].json as any),
+						...normalizeJson(items[i].json),
 						_langwatch: {
-							...(items[i].json as any)?._langwatch,
+							...((normalizeJson(items[i].json) as any)?._langwatch),
 							recorded: true,
 							lastEvaluation: evaluation,
 						},
@@ -415,10 +424,10 @@ export class LangWatchEvaluation implements INodeType {
 
 				out.push({
 					json: {
-						...(items[i].json as any),
+						...normalizeJson(items[i].json),
 						evaluation,
 						_langwatch: {
-							...(items[i].json as any)?._langwatch,
+							...((normalizeJson(items[i].json) as any)?._langwatch),
 							recorded: true,
 						},
 					},
@@ -475,9 +484,9 @@ export class LangWatchEvaluation implements INodeType {
 
 			const out1 = items.map((it, idx) => ({
 				json: {
-					...(it.json as any),
+					...normalizeJson(it.json),
 					_langwatch: {
-						...(it.json as any)?._langwatch,
+						...((normalizeJson(it.json) as any)?._langwatch),
 						datasetWrite: { datasetSlug, index: idx, written: true },
 					},
 				},

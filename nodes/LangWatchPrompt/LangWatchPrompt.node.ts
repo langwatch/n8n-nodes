@@ -341,14 +341,20 @@ export class LangWatchPrompt implements INodeType {
 				);
 			}
 
-			const outputData: IDataObject = {
-				compiledPrompt: void 0, // So that it's at the top in the UI if present.
-				prompt: {
-					...prompt,
+			// Ensure we emit plain JSON objects only
+			const toPlain = (v: unknown): IDataObject => {
+				try {
+					return JSON.parse(JSON.stringify(v || {}));
+				} catch {
+					return {};
+				}
+			};
 
-					// Wipe this as it's a duplicate
-					promptData: void 0,
-				},
+			const plainPrompt = toPlain(prompt) as IDataObject;
+			delete (plainPrompt as any).promptData;
+
+			const outputData: IDataObject = {
+				prompt: plainPrompt,
 			};
 
 			if (compile) {
@@ -359,13 +365,10 @@ export class LangWatchPrompt implements INodeType {
 						? prompt.compileStrict(variables)
 						: prompt.compile(variables);
 
-					outputData.compiledPrompt = {
-						...compiledPrompt,
-
-						// Wipe these as we persist at the root
-						promptData: void 0,
-						original: void 0,
-					};
+					const plainCompiled = toPlain(compiledPrompt) as IDataObject;
+					delete (plainCompiled as any).promptData;
+					delete (plainCompiled as any).original;
+					(outputData as any).compiledPrompt = plainCompiled;
 				} catch (compilationError) {
 					if (compilationError instanceof Error) {
 						throw new NodeOperationError(
