@@ -8,7 +8,7 @@ This is an n8n community node. It lets you use [LangWatch](https://langwatch.ai)
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-## 🚀 **Recommended: Pair with Observability**
+## 🚀 **Recommended: Pair with [Observability](https://github.com/langwatch/n8n-observability)**
 
 For complete LangWatch integration, pair these nodes with `@langwatch/n8n-observability` to automatically trace your n8n workflows:
 
