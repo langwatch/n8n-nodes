@@ -1,6 +1,6 @@
 {
   "name": "@langwatch/n8n-nodes-langwatch",
-  "version": "1.0.0-prerelease.1",
+  "version": "1.0.0",
   "description": "LangWatch nodes for n8n - observability, evaluation, and prompt management for LLM applications",
   "keywords": [
     "n8n-community-node-package",
